@@ -76,3 +76,43 @@ li{
 .container p {
   padding: 8px 0;
 }
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center align the form elements */
+  margin-top: 2rem;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 12px;
+  margin-top: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  color: #000;
+  background-color: #fff; /* Set background to white for better contrast */
+  transition: border-color 0.3s;
+}
+
+input[type="text"]:focus {
+  border-color: #808080; /* Change border color on focus */
+  outline: none; /* Remove the default outline */
+}
+
+input[type="text"]::placeholder {
+  color: #aaa; /* Placeholder color */
+}
+
+button {
+  background-color: #808080; /* Ensure button color matches */
+  color: #f8f8f8; /* Text color for the button */
+}
+
+/* Optional: Add some styling for the overall form */
+.container {
+  padding: 1rem;
+  border-radius: 8px; /* Slightly round corners for the container */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
+}

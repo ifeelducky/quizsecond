@@ -1,16 +1,32 @@
-import Link from 'next/link';
+'use client';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-export default function Home() {
-  return (
+const NicknameInput = () => {
+    const [nickname, setNickname] = useState('');
+    const router = useRouter();
 
-      <main >
-        <div className="container">
-          <h1>Quiz App</h1>
-          <Link href='/quiz'>
-          <button> Start Quiz </button></Link>
-        </div>
-      </main>
- 
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (nickname) {
+            // Store nickname in local storage or context if needed
+            localStorage.setItem('nickname', nickname);
+            router.push('/quiz'); // Navigate to the quiz page
+        }
+    };
 
-  )
-}
+    return (
+        <form onSubmit={handleSubmit}>
+            <input
+                type="text"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                placeholder="Enter your nickname"
+                required
+            />
+            <button type="submit">Start Quiz</button>
+        </form>
+    );
+};
+
+export default NicknameInput;

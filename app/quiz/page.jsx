@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { fetchQuizData } from '../fetchQuizData'; // Adjust the path if needed
+import supabase from '../supabaseClient'; // Adjust the path if needed
 
 const Page = () => {
     const [activeQuestion, setActiveQuestion] = useState(0);
@@ -13,28 +14,36 @@ const Page = () => {
         correctAnswers: 0,
         wrongAnswers: 0,
     });
-    const [questions, setQuestions] = useState([]); // State to hold questions
+    const [questions, setQuestions] = useState([]);
+    const [nickname, setNickname] = useState('');
 
     useEffect(() => {
         const loadQuizData = async () => {
             const quiz = await fetchQuizData();
             if (quiz) {
-                setQuestions(quiz.questions); // Set the fetched questions
+                setQuestions(quiz.questions);
             }
         };
         loadQuizData();
+
+        // Retrieve nickname from local storage
+        const storedNickname = localStorage.getItem('nickname');
+        if (storedNickname) {
+            setNickname(storedNickname);
+        } else {
+            // Redirect back to the nickname input page if nickname isn't available
+            window.location.href = '/'; // Go back to nickname input
+        }
     }, []);
 
     const { question, answers, correctAnswer } = questions[activeQuestion] || {};
 
-    // Select and check answer
     const onAnswerSelected = (answer, idx) => {
         setChecked(true);
         setSelectedAnswerIndex(idx);
         setSelectedAnswer(answer === correctAnswer);
     };
 
-    // Calculate score and increment to next question
     const nextQuestion = () => {
         setSelectedAnswerIndex(null);
         setResult((prev) =>
@@ -53,10 +62,24 @@ const Page = () => {
         if (activeQuestion < questions.length - 1) {
             setActiveQuestion((prev) => prev + 1);
         } else {
-            setActiveQuestion(0);
-            setShowResult(true);
+            handleFinish();
         }
         setChecked(false);
+    };
+
+    const handleFinish = async () => {
+        await submitScore(nickname, result.score);
+        setShowResult(true);
+    };
+
+    const submitScore = async (username, score) => {
+        const { data, error } = await supabase
+            .from('leaderboard')
+            .insert([{ username, score }]);
+
+        if (error) {
+            console.error('Error submitting score:', error);
+        }
     };
 
     return (
@@ -71,7 +94,7 @@ const Page = () => {
             <div>
                 {!showResult ? (
                     <div className='quiz-container'>
-                        {question ? ( // Ensure question exists before rendering
+                        {question ? (
                             <>
                                 <h3>{question}</h3>
                                 {answers && answers.map((answer, idx) => (
@@ -96,7 +119,7 @@ const Page = () => {
                                 )}
                             </>
                         ) : (
-                            <h3>Loading...</h3> // Loading state
+                            <h3>Loading...</h3>
                         )}
                     </div>
                 ) : (
