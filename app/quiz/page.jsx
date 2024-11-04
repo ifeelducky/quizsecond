@@ -1,9 +1,11 @@
 'use client';
-import React, { useState, useEffect } from 'react';
-import { fetchQuizData } from '../fetchQuizData'; // Adjust the path if needed
-import supabase from '../supabaseClient'; // Adjust the path if needed
+import React, { useState, useEffect, useRef } from 'react';
+import { fetchQuizData } from '../fetchQuizData';
+import supabase from '../supabaseClient';
+import { useRouter } from 'next/navigation';
 
 const Page = () => {
+    const router = useRouter();
     const [activeQuestion, setActiveQuestion] = useState(0);
     const [selectedAnswer, setSelectedAnswer] = useState('');
     const [checked, setChecked] = useState(false);
@@ -16,8 +18,20 @@ const Page = () => {
     });
     const [questions, setQuestions] = useState([]);
     const [nickname, setNickname] = useState('');
+    const [timeLeft, setTimeLeft] = useState(15);
+    const timerRef = useRef(null);
+    const isMovingRef = useRef(false);
 
     useEffect(() => {
+        // Check for nickname first
+        const storedNickname = localStorage.getItem('nickname');
+        if (!storedNickname) {
+            router.push('/');
+            return;
+        }
+        setNickname(storedNickname);
+
+        // Load quiz data
         const loadQuizData = async () => {
             const quiz = await fetchQuizData();
             if (quiz) {
@@ -25,16 +39,74 @@ const Page = () => {
             }
         };
         loadQuizData();
+    }, [router]);
 
-        // Retrieve nickname from local storage
-        const storedNickname = localStorage.getItem('nickname');
-        if (storedNickname) {
-            setNickname(storedNickname);
-        } else {
-            // Redirect back to the nickname input page if nickname isn't available
-            window.location.href = '/'; // Go back to nickname input
+    // Timer effect
+    useEffect(() => {
+        if (timerRef.current) {
+            clearInterval(timerRef.current);
         }
-    }, []);
+
+        if (!showResult && questions.length > 0 && !isMovingRef.current) {
+            timerRef.current = setInterval(() => {
+                setTimeLeft((prevTime) => {
+                    if (prevTime <= 1) {
+                        if (!isMovingRef.current) {
+                            isMovingRef.current = true;
+                            handleTimeOut();
+                        }
+                        return 1;
+                    }
+                    return prevTime - 1;
+                });
+            }, 1000);
+        }
+
+        return () => {
+            if (timerRef.current) {
+                clearInterval(timerRef.current);
+            }
+        };
+    }, [activeQuestion, showResult, questions.length]);
+
+    const handleTimeOut = () => {
+        if (timerRef.current) {
+            clearInterval(timerRef.current);
+        }
+
+        // If answer was selected, use that. Otherwise, count as wrong
+        if (!checked) {
+            setResult((prev) => ({
+                ...prev,
+                wrongAnswers: prev.wrongAnswers + 1,
+            }));
+        } else {
+            setResult((prev) =>
+                selectedAnswer
+                    ? {
+                          ...prev,
+                          score: prev.score + 5,
+                          correctAnswers: prev.correctAnswers + 1,
+                      }
+                    : {
+                          ...prev,
+                          wrongAnswers: prev.wrongAnswers + 1,
+                      }
+            );
+        }
+        
+        setTimeout(() => {
+            if (activeQuestion < questions.length - 1) {
+                setActiveQuestion((prev) => prev + 1);
+                setSelectedAnswerIndex(null);
+                setChecked(false);
+                setTimeLeft(15);
+                isMovingRef.current = false;
+            } else {
+                handleFinish();
+            }
+        }, 0);
+    };
 
     const { question, answers, correctAnswer } = questions[activeQuestion] || {};
 
@@ -45,7 +117,10 @@ const Page = () => {
     };
 
     const nextQuestion = () => {
-        setSelectedAnswerIndex(null);
+        if (timerRef.current) {
+            clearInterval(timerRef.current);
+        }
+
         setResult((prev) =>
             selectedAnswer
                 ? {
@@ -61,19 +136,24 @@ const Page = () => {
 
         if (activeQuestion < questions.length - 1) {
             setActiveQuestion((prev) => prev + 1);
+            setSelectedAnswerIndex(null);
+            setChecked(false);
+            setTimeLeft(15);
         } else {
             handleFinish();
         }
-        setChecked(false);
     };
 
     const handleFinish = async () => {
+        if (timerRef.current) {
+            clearInterval(timerRef.current);
+        }
         await submitScore(nickname, result.score);
         setShowResult(true);
     };
 
     const submitScore = async (username, score) => {
-        const { data, error } = await supabase
+        const { error } = await supabase
             .from('leaderboard')
             .insert([{ username, score }]);
 
@@ -90,6 +170,23 @@ const Page = () => {
                     Question: {activeQuestion + 1}
                     <span>/{questions.length}</span>
                 </h2>
+                {!showResult && questions.length > 0 && (
+                    <div className='timer' style={{ 
+                        color: timeLeft <= 5 ? '#ff4444' : '#333',
+                        fontWeight: 'bold',
+                        fontSize: '1.5rem',
+                        marginBottom: '1rem',
+                        padding: '0.5rem 1rem',
+                        background: '#f8f9fa',
+                        borderRadius: '4px',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                        display: 'inline-block',
+                        minWidth: '200px',
+                        textAlign: 'center'
+                    }}>
+                        Time Remaining: {timeLeft}s
+                    </div>
+                )}
             </div>
             <div>
                 {!showResult ? (
