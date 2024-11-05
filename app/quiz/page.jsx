@@ -23,6 +23,14 @@ const Page = () => {
     const isMovingRef = useRef(false);
     const [submitError, setSubmitError] = useState(null);
 
+    const generateUUID = () => {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            const r = Math.random() * 16 | 0;
+            const v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    };
+
     useEffect(() => {
         // Check for nickname first
         const storedNickname = localStorage.getItem('nickname');
@@ -164,15 +172,12 @@ const Page = () => {
         console.log('Attempting to submit score:', { nickname, score });
         
         try {
-            // Generate a simple user_id based on timestamp and random number
-            const user_id = `anon_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            
             const { data, error } = await supabase
                 .from('leaderboard')
                 .insert([{ 
                     nickname,
                     score,
-                    user_id,
+                    user_id: generateUUID(),
                     created_at: new Date().toISOString()
                 }]);
 

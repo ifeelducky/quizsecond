@@ -1,12 +1,10 @@
-page-ed412e48aa6b899d.js:1 Supabase Configuration: {hasUrl: true, hasKey: true, baseUrl: 'https://akgyjgexvmcxnkursrnd.supabase.co'}
-page-ed412e48aa6b899d.js:1 Questions table test successful
-page-ed412e48aa6b899d.js:1 Found questions count: 5
-page-ed412e48aa6b899d.js:1 Leaderboard table test successful
-page-ed412e48aa6b899d.js:1 Attempting to submit score: {nickname: 'PleaseWork', score: 53}
+page-10590c3c9d61edd0.js:1 Supabase Configuration: {hasUrl: true, hasKey: true, baseUrl: 'https://akgyjgexvmcxnkursrnd.supabase.co'}
+page-10590c3c9d61edd0.js:1 Found questions count: 5
+page-10590c3c9d61edd0.js:1 Attempting to submit score: {nickname: 'ert', score: 55}
 327-b37d113118d64189.js:6 
         
         
-       POST https://akgyjgexvmcxnkursrnd.supabase.co/rest/v1/leaderboard?columns=%22nickname%22%2C%22score%22%2C%22created_at%22 400 (Bad Request)
+       POST https://akgyjgexvmcxnkursrnd.supabase.co/rest/v1/leaderboard?columns=%22nickname%22%2C%22score%22%2C%22user_id%22%2C%22created_at%22 400 (Bad Request)
 (anonymous) @ 327-b37d113118d64189.js:6
 h @ 327-b37d113118d64189.js:6
 r @ 327-b37d113118d64189.js:6
@@ -15,12 +13,12 @@ i @ 327-b37d113118d64189.js:6
 (anonymous) @ 327-b37d113118d64189.js:6
 (anonymous) @ 327-b37d113118d64189.js:6
 then @ 327-b37d113118d64189.js:1
-117-6d7ba87922afbd21.js:1 Error submitting score: {message: 'null value in column "user_id" of relation "leaderboard" violates not-null constraint', details: 'Failing row contains (56, PleaseWork, null, 53, 2024-11-05 10:31:54.962).', hint: null, code: '23502'}
+117-6d7ba87922afbd21.js:1 Error submitting score: {message: 'invalid input syntax for type uuid: "anon_1730803242306_8anpaueve"', details: null, hint: null, code: '22P02'}
 push.2304.window.console.error @ 117-6d7ba87922afbd21.js:1
-T @ page-ed412e48aa6b899d.js:1
-await in T
-Q @ page-ed412e48aa6b899d.js:1
-onClick @ page-ed412e48aa6b899d.js:1
+R @ page-10590c3c9d61edd0.js:1
+await in R
+_ @ page-10590c3c9d61edd0.js:1
+onClick @ page-10590c3c9d61edd0.js:1
 a_ @ fd9d1056-13baa9b2029d31fe.js:1
 aR @ fd9d1056-13baa9b2029d31fe.js:1
 (anonymous) @ fd9d1056-13baa9b2029d31fe.js:1
@@ -32,12 +30,12 @@ iV @ fd9d1056-13baa9b2029d31fe.js:1
 sU @ fd9d1056-13baa9b2029d31fe.js:1
 uR @ fd9d1056-13baa9b2029d31fe.js:1
 uM @ fd9d1056-13baa9b2029d31fe.js:1
-117-6d7ba87922afbd21.js:1 Unexpected error in submitScore: {code: '23502', details: 'Failing row contains (56, PleaseWork, null, 53, 2024-11-05 10:31:54.962).', hint: null, message: 'null value in column "user_id" of relation "leaderboard" violates not-null constraint'}
+117-6d7ba87922afbd21.js:1 Unexpected error in submitScore: {code: '22P02', details: null, hint: null, message: 'invalid input syntax for type uuid: "anon_1730803242306_8anpaueve"'}
 push.2304.window.console.error @ 117-6d7ba87922afbd21.js:1
-T @ page-ed412e48aa6b899d.js:1
-await in T
-Q @ page-ed412e48aa6b899d.js:1
-onClick @ page-ed412e48aa6b899d.js:1
+R @ page-10590c3c9d61edd0.js:1
+await in R
+_ @ page-10590c3c9d61edd0.js:1
+onClick @ page-10590c3c9d61edd0.js:1
 a_ @ fd9d1056-13baa9b2029d31fe.js:1
 aR @ fd9d1056-13baa9b2029d31fe.js:1
 (anonymous) @ fd9d1056-13baa9b2029d31fe.js:1
@@ -49,11 +47,11 @@ iV @ fd9d1056-13baa9b2029d31fe.js:1
 sU @ fd9d1056-13baa9b2029d31fe.js:1
 uR @ fd9d1056-13baa9b2029d31fe.js:1
 uM @ fd9d1056-13baa9b2029d31fe.js:1
-117-6d7ba87922afbd21.js:1 Error in handleFinish: {code: '23502', details: 'Failing row contains (56, PleaseWork, null, 53, 2024-11-05 10:31:54.962).', hint: null, message: 'null value in column "user_id" of relation "leaderboard" violates not-null constraint'}
+117-6d7ba87922afbd21.js:1 Error in handleFinish: {code: '22P02', details: null, hint: null, message: 'invalid input syntax for type uuid: "anon_1730803242306_8anpaueve"'}
 push.2304.window.console.error @ 117-6d7ba87922afbd21.js:1
-Q @ page-ed412e48aa6b899d.js:1
-await in Q
-onClick @ page-ed412e48aa6b899d.js:1
+_ @ page-10590c3c9d61edd0.js:1
+await in _
+onClick @ page-10590c3c9d61edd0.js:1
 a_ @ fd9d1056-13baa9b2029d31fe.js:1
 aR @ fd9d1056-13baa9b2029d31fe.js:1
 (anonymous) @ fd9d1056-13baa9b2029d31fe.js:1
