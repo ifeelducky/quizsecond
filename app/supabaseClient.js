@@ -21,17 +21,30 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     }
 });
 
-// Test the connection
+// Test the questions table connection
 supabase.from('questions').select('count(*)', { count: 'exact', head: true })
     .then(({ count, error }) => {
         if (error) {
-            console.error('Supabase connection test failed:', error);
+            console.error('Questions table connection test failed:', error);
         } else {
-            console.log('Supabase connection successful, questions count:', count);
+            console.log('Questions table connection successful, count:', count);
         }
     })
     .catch(err => {
-        console.error('Connection test error:', err);
+        console.error('Questions table connection test error:', err);
+    });
+
+// Test the leaderboard table connection
+supabase.from('leaderboard').select('count(*)', { count: 'exact', head: true })
+    .then(({ count, error }) => {
+        if (error) {
+            console.error('Leaderboard table connection test failed:', error);
+        } else {
+            console.log('Leaderboard table connection successful, count:', count);
+        }
+    })
+    .catch(err => {
+        console.error('Leaderboard table connection test error:', err);
     });
 
 export default supabase;

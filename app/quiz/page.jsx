@@ -21,6 +21,7 @@ const Page = () => {
     const [timeLeft, setTimeLeft] = useState(15);
     const timerRef = useRef(null);
     const isMovingRef = useRef(false);
+    const [submitError, setSubmitError] = useState(null);
 
     useEffect(() => {
         // Check for nickname first
@@ -148,17 +149,43 @@ const Page = () => {
         if (timerRef.current) {
             clearInterval(timerRef.current);
         }
-        await submitScore(nickname, result.score);
-        setShowResult(true);
+        try {
+            await submitScore(nickname, result.score);
+            setShowResult(true);
+            setSubmitError(null);
+        } catch (error) {
+            console.error('Error in handleFinish:', error);
+            setSubmitError('Failed to submit score. Please try again.');
+            setShowResult(true); // Still show results even if submission fails
+        }
     };
 
-    const submitScore = async (username, score) => {
-        const { error } = await supabase
-            .from('leaderboard')
-            .insert([{ username, score }]);
+    const submitScore = async (nickname, score) => {
+        console.log('Attempting to submit score:', { nickname, score });
+        
+        try {
+            const { data, error } = await supabase
+                .from('leaderboard')
+                .insert([{ 
+                    nickname: nickname,
+                    score: score,
+                    created_at: new Date().toISOString()
+                }])
+                .select();
 
-        if (error) {
-            console.error('Error submitting score:', error);
+            if (error) {
+                console.error('Error submitting score:', {
+                    message: error.message,
+                    details: error.details,
+                    hint: error.hint
+                });
+                throw error;
+            }
+
+            console.log('Score submitted successfully:', data);
+        } catch (err) {
+            console.error('Unexpected error in submitScore:', err);
+            throw err;
         }
     };
 
@@ -244,6 +271,9 @@ const Page = () => {
                         <p>
                             Wrong Answers: <span>{result.wrongAnswers}</span>
                         </p>
+                        {submitError && (
+                            <p style={{ color: 'red', marginTop: '1rem' }}>{submitError}</p>
+                        )}
                         <button onClick={() => window.location.reload()}>Restart</button>
                     </div>
                 )}
