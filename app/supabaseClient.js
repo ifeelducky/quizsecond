@@ -12,26 +12,25 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
-        persistSession: false
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: false
     },
     global: {
         headers: {
-            'apikey': supabaseAnonKey
+            'Authorization': `Bearer ${supabaseAnonKey}`,
+            'apikey': supabaseAnonKey,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
         }
     }
 });
 
-// Test the connection
-supabase.from('questions').select('count(*)', { count: 'exact', head: true })
-    .then(({ count, error }) => {
-        if (error) {
-            console.error('Supabase connection test failed:', error);
-        } else {
-            console.log('Supabase connection successful, questions count:', count);
-        }
-    })
-    .catch(err => {
-        console.error('Connection test error:', err);
-    });
+// Log the configuration for debugging
+console.log('Supabase Configuration:', {
+    hasUrl: !!supabaseUrl,
+    hasKey: !!supabaseAnonKey,
+    baseUrl: supabase.supabaseUrl
+});
 
 export default supabase;

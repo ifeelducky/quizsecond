@@ -21,6 +21,15 @@ const Page = () => {
     const [timeLeft, setTimeLeft] = useState(15);
     const timerRef = useRef(null);
     const isMovingRef = useRef(false);
+    const [submitError, setSubmitError] = useState(null);
+
+    const generateUUID = () => {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            const r = Math.random() * 16 | 0;
+            const v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    };
 
     useEffect(() => {
         // Check for nickname first
@@ -148,17 +157,45 @@ const Page = () => {
         if (timerRef.current) {
             clearInterval(timerRef.current);
         }
-        await submitScore(nickname, result.score);
-        setShowResult(true);
+        try {
+            await submitScore(nickname, result.score);
+            setShowResult(true);
+            setSubmitError(null);
+        } catch (error) {
+            console.error('Error in handleFinish:', error);
+            setSubmitError('Failed to submit score to leaderboard. Your score was: ' + result.score);
+            setShowResult(true); // Still show results even if submission fails
+        }
     };
 
-    const submitScore = async (username, score) => {
-        const { error } = await supabase
-            .from('leaderboard')
-            .insert([{ username, score }]);
+    const submitScore = async (nickname, score) => {
+        console.log('Attempting to submit score:', { nickname, score });
+        
+        try {
+            const { data, error } = await supabase
+                .from('leaderboard')
+                .insert([{ 
+                    nickname,
+                    score,
+                    user_id: generateUUID(),
+                    created_at: new Date().toISOString()
+                }]);
 
-        if (error) {
-            console.error('Error submitting score:', error);
+            if (error) {
+                console.error('Error submitting score:', {
+                    message: error.message,
+                    details: error.details,
+                    hint: error.hint,
+                    code: error.code
+                });
+                throw error;
+            }
+
+            console.log('Score submitted successfully:', data);
+            return data;
+        } catch (err) {
+            console.error('Unexpected error in submitScore:', err);
+            throw err;
         }
     };
 
@@ -244,6 +281,9 @@ const Page = () => {
                         <p>
                             Wrong Answers: <span>{result.wrongAnswers}</span>
                         </p>
+                        {submitError && (
+                            <p style={{ color: 'red', marginTop: '1rem' }}>{submitError}</p>
+                        )}
                         <button onClick={() => window.location.reload()}>Restart</button>
                     </div>
                 )}
