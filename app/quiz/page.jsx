@@ -155,7 +155,7 @@ const Page = () => {
             setSubmitError(null);
         } catch (error) {
             console.error('Error in handleFinish:', error);
-            setSubmitError('Failed to submit score. Please try again.');
+            setSubmitError('Failed to submit score to leaderboard. Your score was: ' + result.score);
             setShowResult(true); // Still show results even if submission fails
         }
     };
@@ -167,22 +167,28 @@ const Page = () => {
             const { data, error } = await supabase
                 .from('leaderboard')
                 .insert([{ 
-                    nickname: nickname,
-                    score: score,
+                    nickname,
+                    score,
                     created_at: new Date().toISOString()
-                }])
-                .select();
+                }], {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    }
+                });
 
             if (error) {
                 console.error('Error submitting score:', {
                     message: error.message,
                     details: error.details,
-                    hint: error.hint
+                    hint: error.hint,
+                    code: error.code
                 });
                 throw error;
             }
 
             console.log('Score submitted successfully:', data);
+            return data;
         } catch (err) {
             console.error('Unexpected error in submitScore:', err);
             throw err;

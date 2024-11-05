@@ -12,39 +12,54 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
-        persistSession: false
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: false
     },
     global: {
         headers: {
-            'apikey': supabaseAnonKey
+            'Authorization': `Bearer ${supabaseAnonKey}`,
+            'apikey': supabaseAnonKey,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
         }
     }
 });
 
-// Test the questions table connection
-supabase.from('questions').select('count(*)', { count: 'exact', head: true })
-    .then(({ count, error }) => {
-        if (error) {
-            console.error('Questions table connection test failed:', error);
-        } else {
-            console.log('Questions table connection successful, count:', count);
-        }
-    })
-    .catch(err => {
-        console.error('Questions table connection test error:', err);
-    });
+// Log the configuration for debugging
+console.log('Supabase Configuration:', {
+    hasUrl: !!supabaseUrl,
+    hasKey: !!supabaseAnonKey,
+    baseUrl: supabase.supabaseUrl
+});
 
-// Test the leaderboard table connection
-supabase.from('leaderboard').select('count(*)', { count: 'exact', head: true })
-    .then(({ count, error }) => {
-        if (error) {
-            console.error('Leaderboard table connection test failed:', error);
+// Test the questions table connection with explicit headers
+const testConnection = async () => {
+    try {
+        const { data: questionsCount, error: questionsError } = await supabase
+            .from('questions')
+            .select('*', { count: 'exact', head: true });
+
+        if (questionsError) {
+            console.error('Questions table test failed:', questionsError);
         } else {
-            console.log('Leaderboard table connection successful, count:', count);
+            console.log('Questions table test successful');
         }
-    })
-    .catch(err => {
-        console.error('Leaderboard table connection test error:', err);
-    });
+
+        const { data: leaderboardCount, error: leaderboardError } = await supabase
+            .from('leaderboard')
+            .select('*', { count: 'exact', head: true });
+
+        if (leaderboardError) {
+            console.error('Leaderboard table test failed:', leaderboardError);
+        } else {
+            console.log('Leaderboard table test successful');
+        }
+    } catch (err) {
+        console.error('Connection test error:', err);
+    }
+};
+
+testConnection();
 
 export default supabase;
