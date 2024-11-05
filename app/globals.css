@@ -1,0 +1,118 @@
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html, body{
+  overflow-x:hidden;
+  background-color: #000925;
+}
+
+main{
+  padding: 1rem;
+}
+
+h1,h2{
+  color: #eee;
+
+}
+
+h3{
+  padding-bottom: 2rem;
+  color: #000105;
+  font-size: 1.8 rem;
+}
+
+button{
+  padding: 16px 8px;
+  width:100%;
+  margin-top: 12px;
+  font-size:1rem;
+border-radius: 4px;
+cursor:pointer;
+background-color: #808080;
+color: #f8f8f8
+}
+
+.btn-disabled{
+  background-color: lightgray;
+}
+
+li{
+  list-style-type: none;
+  cursor:pointer;
+  margin: 9px 0;
+  padding: 16px 8x;
+  color: #000105;
+  border: 1px solid lightgray;
+}
+
+.li-hover:hover{
+  background-color: #d8d8d8;
+  columns: #fff
+}
+
+.li-selected{
+  color: #fff;
+  background-color: #000925;
+}
+
+.container{
+  max-width: 740px;
+  width: 100%;
+  margin: auto;
+  padding:1rem;
+}
+
+.quiz-container{
+  background-color: #f8f8f8;
+  padding: 1rem;
+  margin-top:2rem;
+  border-radius:4px;
+}
+
+.container p {
+  padding: 8px 0;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center align the form elements */
+  margin-top: 2rem;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 12px;
+  margin-top: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  color: #000;
+  background-color: #fff; /* Set background to white for better contrast */
+  transition: border-color 0.3s;
+}
+
+input[type="text"]:focus {
+  border-color: #808080; /* Change border color on focus */
+  outline: none; /* Remove the default outline */
+}
+
+input[type="text"]::placeholder {
+  color: #aaa; /* Placeholder color */
+}
+
+button {
+  background-color: #808080; /* Ensure button color matches */
+  color: #f8f8f8; /* Text color for the button */
+}
+
+/* Optional: Add some styling for the overall form */
+.container {
+  padding: 1rem;
+  border-radius: 8px; /* Slightly round corners for the container */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
+}
