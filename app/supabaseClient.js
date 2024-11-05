@@ -33,33 +33,4 @@ console.log('Supabase Configuration:', {
     baseUrl: supabase.supabaseUrl
 });
 
-// Test the questions table connection with explicit headers
-const testConnection = async () => {
-    try {
-        const { data: questionsCount, error: questionsError } = await supabase
-            .from('questions')
-            .select('*', { count: 'exact', head: true });
-
-        if (questionsError) {
-            console.error('Questions table test failed:', questionsError);
-        } else {
-            console.log('Questions table test successful');
-        }
-
-        const { data: leaderboardCount, error: leaderboardError } = await supabase
-            .from('leaderboard')
-            .select('*', { count: 'exact', head: true });
-
-        if (leaderboardError) {
-            console.error('Leaderboard table test failed:', leaderboardError);
-        } else {
-            console.log('Leaderboard table test successful');
-        }
-    } catch (err) {
-        console.error('Connection test error:', err);
-    }
-};
-
-testConnection();
-
 export default supabase;

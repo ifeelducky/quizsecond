@@ -164,18 +164,17 @@ const Page = () => {
         console.log('Attempting to submit score:', { nickname, score });
         
         try {
+            // Generate a simple user_id based on timestamp and random number
+            const user_id = `anon_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            
             const { data, error } = await supabase
                 .from('leaderboard')
                 .insert([{ 
                     nickname,
                     score,
+                    user_id,
                     created_at: new Date().toISOString()
-                }], {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=minimal'
-                    }
-                });
+                }]);
 
             if (error) {
                 console.error('Error submitting score:', {
