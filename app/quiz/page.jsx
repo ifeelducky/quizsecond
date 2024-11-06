@@ -150,41 +150,42 @@ const Page = () => {
             clearInterval(timerRef.current);
         }
 
-        setResult((prev) =>
-            selectedAnswer
-                ? {
-                      ...prev,
-                      score: prev.score + 5 + timeLeft, // Add time bonus for correct answer
-                      correctAnswers: prev.correctAnswers + 1,
-                  }
-                : {
-                      ...prev,
-                      wrongAnswers: prev.wrongAnswers + 1,
-                  }
-        );
+        const newScore = selectedAnswer ? result.score + 5 + timeLeft : result.score;
+        const newCorrectAnswers = selectedAnswer ? result.correctAnswers + 1 : result.correctAnswers;
+        const newWrongAnswers = selectedAnswer ? result.wrongAnswers : result.wrongAnswers + 1;
+
+        setResult({
+            score: newScore,
+            correctAnswers: newCorrectAnswers,
+            wrongAnswers: newWrongAnswers,
+        });
 
         if (activeQuestion < questions.length - 1) {
-            //setActiveQuestion((prev) => prev + 1);
             setWaiting(true);
             setSelectedAnswerIndex(null);
             setChecked(false);
             setTimeLeft(15);
         } else {
-            handleFinish();
+            // For the last question, submit the updated score directly
+            handleFinish({
+                score: newScore,
+                correctAnswers: newCorrectAnswers,
+                wrongAnswers: newWrongAnswers
+            });
         }
     };
 
-    const handleFinish = async () => {
+    const handleFinish = async (finalResult = result) => {
         if (timerRef.current) {
             clearInterval(timerRef.current);
         }
         try {
-            await submitScore(nickname, result.score);
+            await submitScore(nickname, finalResult.score);
             setShowResult(true);
             setSubmitError(null);
         } catch (error) {
             console.error('Error in handleFinish:', error);
-            setSubmitError('Failed to submit score to leaderboard. Your score was: ' + result.score);
+            setSubmitError('Failed to submit score to leaderboard. Your score was: ' + finalResult.score);
             setShowResult(true); // Still show results even if submission fails
         }
     };
