@@ -4,13 +4,15 @@
   box-sizing: border-box;
   padding: 0;
   margin: 0;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-geist-sans), 'Poppins', sans-serif;
 }
 
 html, body {
   overflow-x: hidden;
-  background: linear-gradient(135deg, #000925 0%, #001845 100%);
+  background: linear-gradient(135deg, #000925 0%, #0055ff 100%);
+  background-attachment: fixed;
   min-height: 100vh;
+  color: #fff;
 }
 
 main {
@@ -18,7 +20,7 @@ main {
 }
 
 h1, h2 {
-  color: #eee;
+  color: #fff;
   text-align: center;
   margin: 1rem 0;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -38,6 +40,10 @@ h2 {
   margin-bottom: 1.5rem;
 }
 
+h2 span {
+  color: #a8b8ff;
+}
+
 h3 {
   padding-bottom: 2rem;
   color: #000105;
@@ -52,7 +58,7 @@ button {
   font-size: 1.1rem;
   border-radius: 8px;
   cursor: pointer;
-  background: linear-gradient(45deg, #3498db, #2980b9);
+  background: linear-gradient(45deg, #0066ff, #00ccff);
   color: #ffffff;
   border: none;
   font-weight: 600;
@@ -70,6 +76,7 @@ button:hover {
   cursor: not-allowed;
   transform: none !important;
   box-shadow: none !important;
+  opacity: 0.7;
 }
 
 li {
@@ -87,14 +94,14 @@ li {
 
 .li-hover:hover {
   background-color: #f5f6fa;
-  border-color: #3498db;
+  border-color: #0066ff;
   transform: translateX(5px);
 }
 
 .li-selected {
   color: #fff;
-  background: linear-gradient(45deg, #000925, #001845);
-  border-color: #001845;
+  background: linear-gradient(45deg, #0066ff, #00ccff);
+  border-color: #0066ff;
   transform: translateX(5px);
 }
 
@@ -106,29 +113,37 @@ li {
   position: relative;
 }
 
-.container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 120px;
-  height: 120px;
+.logo {
+  width: 150px;
+  height: 150px;
+  margin: 0 auto 2rem;
   background-image: url('/applogo.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  margin-bottom: 2rem;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
 }
 
 .quiz-container {
-  background-color: rgba(248, 248, 248, 0.95);
+  background-color: rgba(255, 255, 255, 0.95);
   padding: 2rem;
-  margin-top: 8rem;
+  margin-top: 2rem;
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .container p {
@@ -143,7 +158,7 @@ li {
 
 .container p span {
   font-weight: 600;
-  color: #2980b9;
+  color: #0066ff;
 }
 
 .timer {
@@ -156,6 +171,8 @@ li {
   padding: 1rem !important;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
   animation: pulse 1s infinite;
+  margin-bottom: 1rem;
+  min-width: 300px;
 }
 
 @keyframes pulse {
@@ -197,9 +214,9 @@ input[type="password"] {
 input[type="text"]:focus,
 input[type="email"]:focus,
 input[type="password"]:focus {
-  border-color: #3498db;
+  border-color: #0066ff;
   outline: none;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.2);
 }
 
 input::placeholder {
@@ -212,11 +229,12 @@ input::placeholder {
   font-size: 2rem;
   margin-bottom: 2rem;
   text-align: center;
+  font-weight: 700;
 }
 
 /* Waiting state styling */
 .quiz-container h3:only-child {
-  color: #3498db;
+  color: #0066ff;
   animation: bounce 1s infinite;
 }
 
@@ -237,7 +255,7 @@ input::placeholder {
   
   .quiz-container {
     padding: 1.5rem;
-    margin-top: 6rem;
+    margin-top: 2rem;
   }
   
   h1 {
@@ -250,9 +268,16 @@ input::placeholder {
   
   .timer {
     font-size: 1.5rem !important;
+    min-width: 250px;
   }
   
   li {
     padding: 12px;
+  }
+
+  .logo {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 1.5rem;
   }
 }
