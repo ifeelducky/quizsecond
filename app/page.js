@@ -11,7 +11,7 @@ const NicknameInput = () => {
         e.preventDefault();
         if (nickname.trim()) {
             localStorage.setItem('nickname', nickname.trim());
-            router.push('/quiz');
+            router.push('/wait');
         } else {
             setError('Please enter a valid nickname');
         }

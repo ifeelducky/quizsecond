@@ -22,6 +22,7 @@ const Page = () => {
     const timerRef = useRef(null);
     const isMovingRef = useRef(false);
     const [submitError, setSubmitError] = useState(null);
+    const [waiting, setWaiting] = useState(false);
 
     const generateUUID = () => {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -78,6 +79,24 @@ const Page = () => {
         };
     }, [activeQuestion, showResult, questions.length]);
 
+    useEffect(() => {
+        if (waiting === true) {  // Add parentheses around the condition
+            const channel = supabase
+                .channel('quiz_channel')
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'quiz_state' }, (payload) => {
+                    if (payload.new.current_question_index !== activeQuestion) {
+                        setActiveQuestion(payload.new.current_question_index);
+                        setWaiting(false);  // Stop waiting when the new question index is received
+                    }
+                })
+                .subscribe();
+    
+            return () => {
+                channel.unsubscribe();
+            };
+        }
+    }, [router, activeQuestion, waiting]);  // Add `waiting` as a dependency to properly manage the effect
+
     const handleTimeOut = () => {
         if (timerRef.current) {
             clearInterval(timerRef.current);
@@ -106,7 +125,8 @@ const Page = () => {
         
         setTimeout(() => {
             if (activeQuestion < questions.length - 1) {
-                setActiveQuestion((prev) => prev + 1);
+                //setActiveQuestion((prev) => prev + 1);
+                setWaiting(true);
                 setSelectedAnswerIndex(null);
                 setChecked(false);
                 setTimeLeft(15);
@@ -144,7 +164,8 @@ const Page = () => {
         );
 
         if (activeQuestion < questions.length - 1) {
-            setActiveQuestion((prev) => prev + 1);
+            //setActiveQuestion((prev) => prev + 1);
+            setWaiting(true);
             setSelectedAnswerIndex(null);
             setChecked(false);
             setTimeLeft(15);
@@ -207,7 +228,8 @@ const Page = () => {
                     Question: {activeQuestion + 1}
                     <span>/{questions.length}</span>
                 </h2>
-                {!showResult && questions.length > 0 && (
+                {/* Show timer only if waiting is false */}
+            {!showResult && questions.length > 0 && !waiting && (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
                         <div className='timer' style={{ 
                             color: timeLeft <= 5 ? '#ff4444' : '#333',
@@ -235,7 +257,8 @@ const Page = () => {
                 )}
             </div>
             <div>
-                {!showResult ? (
+                {!waiting? (
+                !showResult ? (
                     <div className='quiz-container'>
                         {question ? (
                             <>
@@ -268,7 +291,7 @@ const Page = () => {
                 ) : (
                     <div className='quiz-container'>
                         <h3>Results</h3>
-                        <h3>Overall {(result.score / (questions.length * 5)) * 100}%</h3>
+                        
                         <p>
                             Total Questions: <span>{questions.length}</span>
                         </p>
@@ -284,8 +307,13 @@ const Page = () => {
                         {submitError && (
                             <p style={{ color: 'red', marginTop: '1rem' }}>{submitError}</p>
                         )}
-                        <button onClick={() => window.location.reload()}>Restart</button>
+                        
                     </div>
+                )
+                ):(
+                    <div className='quiz-container'>
+                        <h3>Please wait...</h3>
+                        </div>
                 )}
             </div>
         </div>
