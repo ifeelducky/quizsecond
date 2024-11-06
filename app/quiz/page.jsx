@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { fetchQuizData } from '../fetchQuizData';
 import supabase from '../supabaseClient';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 const Page = () => {
     const router = useRouter();
@@ -22,6 +23,7 @@ const Page = () => {
     const timerRef = useRef(null);
     const isMovingRef = useRef(false);
     const [submitError, setSubmitError] = useState(null);
+    const [waiting, setWaiting] = useState(false);
 
     const generateUUID = () => {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -78,6 +80,24 @@ const Page = () => {
         };
     }, [activeQuestion, showResult, questions.length]);
 
+    useEffect(() => {
+        if (waiting === true) {
+            const channel = supabase
+                .channel('quiz_channel')
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'quiz_state' }, (payload) => {
+                    if (payload.new.current_question_index !== activeQuestion) {
+                        setActiveQuestion(payload.new.current_question_index);
+                        setWaiting(false);
+                    }
+                })
+                .subscribe();
+    
+            return () => {
+                channel.unsubscribe();
+            };
+        }
+    }, [router, activeQuestion, waiting]);
+
     const handleTimeOut = () => {
         if (timerRef.current) {
             clearInterval(timerRef.current);
@@ -94,7 +114,7 @@ const Page = () => {
                 selectedAnswer
                     ? {
                           ...prev,
-                          score: prev.score + 5 + timeLeft, // Add time bonus for correct answer
+                          score: prev.score + 5 + timeLeft,
                           correctAnswers: prev.correctAnswers + 1,
                       }
                     : {
@@ -106,7 +126,7 @@ const Page = () => {
         
         setTimeout(() => {
             if (activeQuestion < questions.length - 1) {
-                setActiveQuestion((prev) => prev + 1);
+                setWaiting(true);
                 setSelectedAnswerIndex(null);
                 setChecked(false);
                 setTimeLeft(15);
@@ -130,41 +150,42 @@ const Page = () => {
             clearInterval(timerRef.current);
         }
 
-        setResult((prev) =>
-            selectedAnswer
-                ? {
-                      ...prev,
-                      score: prev.score + 5 + timeLeft, // Add time bonus for correct answer
-                      correctAnswers: prev.correctAnswers + 1,
-                  }
-                : {
-                      ...prev,
-                      wrongAnswers: prev.wrongAnswers + 1,
-                  }
-        );
+        const newScore = selectedAnswer ? result.score + 5 + timeLeft : result.score;
+        const newCorrectAnswers = selectedAnswer ? result.correctAnswers + 1 : result.correctAnswers;
+        const newWrongAnswers = selectedAnswer ? result.wrongAnswers : result.wrongAnswers + 1;
+
+        setResult({
+            score: newScore,
+            correctAnswers: newCorrectAnswers,
+            wrongAnswers: newWrongAnswers,
+        });
 
         if (activeQuestion < questions.length - 1) {
-            setActiveQuestion((prev) => prev + 1);
+            setWaiting(true);
             setSelectedAnswerIndex(null);
             setChecked(false);
             setTimeLeft(15);
         } else {
-            handleFinish();
+            handleFinish({
+                score: newScore,
+                correctAnswers: newCorrectAnswers,
+                wrongAnswers: newWrongAnswers
+            });
         }
     };
 
-    const handleFinish = async () => {
+    const handleFinish = async (finalResult = result) => {
         if (timerRef.current) {
             clearInterval(timerRef.current);
         }
         try {
-            await submitScore(nickname, result.score);
+            await submitScore(nickname, finalResult.score);
             setShowResult(true);
             setSubmitError(null);
         } catch (error) {
             console.error('Error in handleFinish:', error);
-            setSubmitError('Failed to submit score to leaderboard. Your score was: ' + result.score);
-            setShowResult(true); // Still show results even if submission fails
+            setSubmitError('Failed to submit score to leaderboard. Your score was: ' + finalResult.score);
+            setShowResult(true);
         }
     };
 
@@ -201,32 +222,21 @@ const Page = () => {
 
     return (
         <div className='container'>
+            <div className='logo'></div>
             <h1>Quiz Page</h1>
             <div>
                 <h2>
                     Question: {activeQuestion + 1}
                     <span>/{questions.length}</span>
                 </h2>
-                {!showResult && questions.length > 0 && (
+                {!showResult && questions.length > 0 && !waiting && (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-                        <div className='timer' style={{ 
-                            color: timeLeft <= 5 ? '#ff4444' : '#333',
-                            fontWeight: 'bold',
-                            fontSize: '1.5rem',
-                            marginBottom: '0.5rem',
-                            padding: '0.5rem 1rem',
-                            background: '#f8f9fa',
-                            borderRadius: '4px',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                            display: 'inline-block',
-                            minWidth: '200px',
-                            textAlign: 'center'
-                        }}>
+                        <div className='timer'>
                             Time Remaining: {timeLeft}s
                         </div>
                         <div style={{
                             fontSize: '0.9rem',
-                            color: '#666',
+                            color: '#fff',
                             textAlign: 'center'
                         }}>
                             Correct answers earn 5 points + remaining seconds as bonus!
@@ -235,56 +245,60 @@ const Page = () => {
                 )}
             </div>
             <div>
-                {!showResult ? (
-                    <div className='quiz-container'>
-                        {question ? (
-                            <>
-                                <h3>{question}</h3>
-                                {answers && answers.map((answer, idx) => (
-                                    <li
-                                        key={idx}
-                                        onClick={() => onAnswerSelected(answer, idx)}
-                                        className={
-                                            selectedAnswerIndex === idx ? 'li-selected' : 'li-hover'
-                                        }
-                                    >
-                                        <span>{answer}</span>
-                                    </li>
-                                ))}
-                                {checked ? (
-                                    <button onClick={nextQuestion} className='btn'>
-                                        {activeQuestion === questions.length - 1 ? 'Finish' : 'Next'}
-                                    </button>
-                                ) : (
-                                    <button disabled className='btn-disabled'>
-                                        {activeQuestion === questions.length - 1 ? 'Finish' : 'Next'}
-                                    </button>
-                                )}
-                            </>
-                        ) : (
-                            <h3>Loading...</h3>
-                        )}
-                    </div>
+                {!waiting ? (
+                    !showResult ? (
+                        <div className='quiz-container'>
+                            {question ? (
+                                <>
+                                    <h3>{question}</h3>
+                                    {answers && answers.map((answer, idx) => (
+                                        <li
+                                            key={idx}
+                                            onClick={() => onAnswerSelected(answer, idx)}
+                                            className={
+                                                selectedAnswerIndex === idx ? 'li-selected' : 'li-hover'
+                                            }
+                                        >
+                                            <span>{answer}</span>
+                                        </li>
+                                    ))}
+                                    {checked ? (
+                                        <button onClick={nextQuestion} className='btn'>
+                                            {activeQuestion === questions.length - 1 ? 'Finish' : 'Next'}
+                                        </button>
+                                    ) : (
+                                        <button disabled className='btn-disabled'>
+                                            {activeQuestion === questions.length - 1 ? 'Finish' : 'Next'}
+                                        </button>
+                                    )}
+                                </>
+                            ) : (
+                                <h3>Loading...</h3>
+                            )}
+                        </div>
+                    ) : (
+                        <div className='quiz-container'>
+                            <h3>Results</h3>
+                            <p>
+                                Total Questions: <span>{questions.length}</span>
+                            </p>
+                            <p>
+                                Total Score: <span>{result.score}</span>
+                            </p>
+                            <p>
+                                Correct Answers: <span>{result.correctAnswers}</span>
+                            </p>
+                            <p>
+                                Wrong Answers: <span>{result.wrongAnswers}</span>
+                            </p>
+                            {submitError && (
+                                <p style={{ color: 'red', marginTop: '1rem' }}>{submitError}</p>
+                            )}
+                        </div>
+                    )
                 ) : (
                     <div className='quiz-container'>
-                        <h3>Results</h3>
-                        <h3>Overall {(result.score / (questions.length * 5)) * 100}%</h3>
-                        <p>
-                            Total Questions: <span>{questions.length}</span>
-                        </p>
-                        <p>
-                            Total Score: <span>{result.score}</span>
-                        </p>
-                        <p>
-                            Correct Answers: <span>{result.correctAnswers}</span>
-                        </p>
-                        <p>
-                            Wrong Answers: <span>{result.wrongAnswers}</span>
-                        </p>
-                        {submitError && (
-                            <p style={{ color: 'red', marginTop: '1rem' }}>{submitError}</p>
-                        )}
-                        <button onClick={() => window.location.reload()}>Restart</button>
+                        <h3>Please wait...</h3>
                     </div>
                 )}
             </div>
