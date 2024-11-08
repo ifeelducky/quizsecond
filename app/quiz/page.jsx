@@ -19,7 +19,7 @@ const Page = () => {
     });
     const [questions, setQuestions] = useState([]);
     const [nickname, setNickname] = useState('');
-    const [timeLeft, setTimeLeft] = useState(15);
+    const [timeLeft, setTimeLeft] = useState(20);
     const timerRef = useRef(null);
     const isMovingRef = useRef(false);
     const [submitError, setSubmitError] = useState(null);
@@ -129,7 +129,7 @@ const Page = () => {
                 setWaiting(true);
                 setSelectedAnswerIndex(null);
                 setChecked(false);
-                setTimeLeft(15);
+                setTimeLeft(20);
                 isMovingRef.current = false;
             } else {
                 handleFinish();
@@ -164,7 +164,7 @@ const Page = () => {
             setWaiting(true);
             setSelectedAnswerIndex(null);
             setChecked(false);
-            setTimeLeft(15);
+            setTimeLeft(20);
         } else {
             handleFinish({
                 score: newScore,
