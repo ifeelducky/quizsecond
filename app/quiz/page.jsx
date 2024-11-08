@@ -223,7 +223,7 @@ const Page = () => {
     return (
         <div className='container'>
             <div className='logo'></div>
-            <h1>Quiz Page</h1>
+            {/* <h1>Quiz Page</h1> */}
             <div>
                 <h2>
                     Question: {activeQuestion + 1}
@@ -279,18 +279,18 @@ const Page = () => {
                     ) : (
                         <div className='quiz-container'>
                             <h3>Results</h3>
-                            <p>
+                            {/* <p>
                                 Total Questions: <span>{questions.length}</span>
-                            </p>
+                            </p> */}
                             <p>
                                 Total Score: <span>{result.score}</span>
                             </p>
-                            <p>
+                            {/* <p>
                                 Correct Answers: <span>{result.correctAnswers}</span>
                             </p>
                             <p>
                                 Wrong Answers: <span>{result.wrongAnswers}</span>
-                            </p>
+                            </p> */}
                             {submitError && (
                                 <p style={{ color: 'red', marginTop: '1rem' }}>{submitError}</p>
                             )}
